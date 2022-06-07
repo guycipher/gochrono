@@ -256,9 +256,19 @@ func parseField(value string, fieldType fieldType) (*cronFieldBits, error) {
 	return cronFieldBits, nil
 }
 
+func EndOfMonth(date time.Time) time.Time {
+	return date.AddDate(0, 1, -date.Day())
+}
+
 func parseRange(value string, fieldType fieldType) (valueRange, error) {
 	if value == "*" {
 		return newValueRange(fieldType.MinValue, fieldType.MaxValue), nil
+	} else if value == "?" {
+		/* ? is pretty much the same as * with a min and max */
+		return newValueRange(fieldType.MinValue, fieldType.MaxValue), nil
+	} else if value == "L" {
+		/* L return last day of current month */
+		return newValueRange(EndOfMonth(time.Now()).Day(),EndOfMonth(time.Now()).Day()), nil
 	} else {
 		hyphenPos := strings.Index(value, "-")
 
