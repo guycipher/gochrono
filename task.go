@@ -91,6 +91,7 @@ func WithLocation(location string) Option {
 }
 
 type ScheduledTask interface {
+	NextRunTime() time.Time
 	Cancel()
 	IsCancelled() bool
 }
@@ -105,9 +106,6 @@ type ScheduledRunnableTask struct {
 	cancelled   bool
 }
 
-func NextRunTime(t SchedulerTask) time.Time {
-	return t.startTime
-}
 
 
 func CreateScheduledRunnableTask(id int, task Task, triggerTime time.Time, period time.Duration, fixedRate bool) (*ScheduledRunnableTask, error) {
@@ -132,6 +130,12 @@ func (scheduledRunnableTask *ScheduledRunnableTask) Cancel() {
 	scheduledRunnableTask.taskMu.Lock()
 	defer scheduledRunnableTask.taskMu.Unlock()
 	scheduledRunnableTask.cancelled = true
+}
+
+func (scheduledRunnableTask *ScheduledRunnableTask) NextRunTime() time.Time {
+	scheduledRunnableTask.taskMu.Lock()
+	defer scheduledRunnableTask.taskMu.Unlock()
+	return scheduledRunnableTask.triggerTime
 }
 
 func (scheduledRunnableTask *ScheduledRunnableTask) IsCancelled() bool {
@@ -207,10 +211,17 @@ func (task *TriggerTask) Cancel() {
 	task.currentScheduledTask.Cancel()
 }
 
+
+
 func (task *TriggerTask) IsCancelled() bool {
 	task.triggerContextMu.Lock()
 	defer task.triggerContextMu.Unlock()
 	return task.currentScheduledTask.IsCancelled()
+}
+
+func (task *TriggerTask) NextRunTime() time.Time {
+
+	return task.nextTriggerTime
 }
 
 func (task *TriggerTask) Schedule() (ScheduledTask, error) {
@@ -226,11 +237,11 @@ func (task *TriggerTask) Schedule() (ScheduledTask, error) {
 	initialDelay := task.nextTriggerTime.Sub(time.Now())
 
 	currentScheduledTask, err := task.executor.Schedule(task.Run, initialDelay)
-
+	
 	if err != nil {
 		return nil, err
 	}
-
+	
 	task.currentScheduledTask = currentScheduledTask.(*ScheduledRunnableTask)
 	return task, nil
 }
