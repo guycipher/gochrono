@@ -105,6 +105,11 @@ type ScheduledRunnableTask struct {
 	cancelled   bool
 }
 
+func NextRunTime(t SchedulerTask) time.Time {
+	return t.startTime
+}
+
+
 func CreateScheduledRunnableTask(id int, task Task, triggerTime time.Time, period time.Duration, fixedRate bool) (*ScheduledRunnableTask, error) {
 	if task == nil {
 		return nil, errors.New("task cannot be nil")
@@ -206,10 +211,6 @@ func (task *TriggerTask) IsCancelled() bool {
 	task.triggerContextMu.Lock()
 	defer task.triggerContextMu.Unlock()
 	return task.currentScheduledTask.IsCancelled()
-}
-
-func (task *TriggerTask) NextRunTime() time.Time {
-	return task.currentScheduledTask.triggerTime
 }
 
 func (task *TriggerTask) Schedule() (ScheduledTask, error) {
