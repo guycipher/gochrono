@@ -256,7 +256,7 @@ func parseField(value string, fieldType fieldType) (*cronFieldBits, error) {
 	return cronFieldBits, nil
 }
 
-func EndOfMonth(date time.Time) time.Time {
+func endOfMonth(date time.Time) time.Time {
 	return date.AddDate(0, 1, -date.Day())
 }
 
@@ -268,7 +268,7 @@ func parseRange(value string, fieldType fieldType) (valueRange, error) {
 		return newValueRange(fieldType.MinValue, fieldType.MaxValue), nil
 	} else if value == "L" {
 		/* L return last day of current month */
-		return newValueRange(EndOfMonth(time.Now()).Day(),EndOfMonth(time.Now()).Day()), nil
+		return newValueRange(endOfMonth(time.Now()).Day(),endOfMonth(time.Now()).Day()), nil
 	} else {
 		hyphenPos := strings.Index(value, "-")
 
