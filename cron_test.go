@@ -1,9 +1,10 @@
 package chrono
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const timeLayout = "2006-01-02 15:04:05"

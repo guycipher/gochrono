@@ -208,6 +208,10 @@ func (task *TriggerTask) IsCancelled() bool {
 	return task.currentScheduledTask.IsCancelled()
 }
 
+func (task *TriggerTask) NextRunTime() time.Time {
+	return task.currentScheduledTask.triggerTime
+}
+
 func (task *TriggerTask) Schedule() (ScheduledTask, error) {
 	task.triggerContextMu.Lock()
 	defer task.triggerContextMu.Unlock()
